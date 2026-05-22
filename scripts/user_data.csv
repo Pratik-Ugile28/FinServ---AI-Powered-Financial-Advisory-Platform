@@ -1,0 +1,6 @@
+name,email,password,phone,occupation,annualIncome,currency,country,dob
+John Doe,john@example.com,example_password,1234567890,Engineer,100000,USD,USA,1990-01-01
+Jane Smith,jane@example.com,example_password,0987654321,Doctor,150000,EUR,Germany,1985-05-15
+Alice Johnson,alice@example.com,example_password,1122334455,Designer,80000,GBP,UK,1992-08-20
+Bob Williams,bob@example.com,example_password,5566778899,Manager,120000,USD,USA,1980-11-10
+Charlie Brown,charlie@example.com,example_password,9988776655,Teacher,60000,CAD,Canada,1995-03-25

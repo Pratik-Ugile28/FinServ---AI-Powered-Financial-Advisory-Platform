@@ -1,0 +1,552 @@
+<% /* views/chat_updated.ejs (COMPLETE UPDATED CODE with improved speech handling) */ %>
+
+  <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+
+    <title>FinGPT</title>
+    <link rel="icon" href="/img/Icon.png" type="image/png">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <style>
+      .sidebar {
+        font-family: "Poppins", sans-serif;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        height: 100%;
+        background-color: #041643;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 30px;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+        box-shadow: 2px 1px 6px rgb(249, 255, 235);
+      }
+
+      .sidebar .logo {
+        width: 90%;
+        margin-bottom: 5%;
+      }
+
+      .sidebar.active {
+        width: 100px;
+        overflow: hidden;
+      }
+
+      .sidebar li {
+        list-style: none;
+      }
+
+      .sidebar a {
+        text-decoration: none;
+      }
+
+      .sidebar ul {
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+      }
+
+      .sidebar span {
+        margin-right: 15px;
+      }
+
+      .sidebar--items a,
+      .sidebar--bottom-items a {
+        display: flex;
+        flex-flow: row;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+        color: #ffffff;
+        padding: 7px;
+        border-radius: 13px;
+      }
+
+      .sidebar--items a:hover,
+      .sidebar--bottom-items a:hover {
+        background-color: #cdffcf;
+        color: #0031b9;
+      }
+
+      #active--link {
+        background-color: #39c440;
+        color: #fff;
+      }
+
+      .sidebar--items {
+        flex-grow: 0.85;
+      }
+
+      .section-name,
+      .overview,
+      div {
+        font-family: "Poppins", sans-serif;
+      }
+
+      .expand-card:hover {
+        transform: scale(1.02);
+        box-shadow: 4px 8px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .chat-container {
+        flex-grow: 1;
+        height: calc(100vh - 100px);
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+      }
+
+      .chat-header {
+        padding: 20px;
+        background-color: #3498db;
+        color: white;
+        font-size: 1.2rem;
+        text-align: center;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .chat-messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background-color: #f5f5f5;
+      }
+
+      .message {
+        max-width: 75%;
+        padding: 15px;
+        border-radius: 15px;
+        font-size: 16px;
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #3498db;
+        color: white;
+        border-bottom-right-radius: 0;
+      }
+
+      .bot-message {
+        align-self: flex-start;
+        background-color: #072777;
+        color: white;
+        border-bottom-left-radius: 0;
+      }
+
+      .chat-input {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        padding: 10px;
+        background-color: white;
+        border-top: 1px solid #ccc;
+      }
+
+      .chat-input input {
+        flex-grow: 1;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      .chat-input button {
+        padding: 10px 20px;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .chat-input button:hover {
+        background-color: #2980b9;
+      }
+
+      .send-btn {
+        font-family: "Poppins", sans-serif;
+      }
+
+      .mic-btn {
+        background-color: #072777;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        cursor: pointer;
+        padding: 10px 15px;
+        transition: background-color 0.3s ease;
+      }
+
+      .mic-btn.listening {
+        background-color: #e74c3c;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4)
+        }
+
+        70% {
+          box-shadow: 0 0 0 10px rgba(231, 76, 60, 0)
+        }
+
+        100% {
+          box-shadow: 0 0 0 0 rgba(231, 76, 60, 0)
+        }
+      }
+
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 4px solid #072777;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg)
+        }
+
+        100% {
+          transform: rotate(360deg)
+        }
+      }
+
+      .chat-messages::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .chat-messages::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <img src="/img/logo.png" alt="description" class="logo" />
+      <hr style="width:100%; margin-bottom:10%" />
+
+      <ul class="sidebar--items">
+        <li><a href="/"><span class="icon icon-1"><i class="ri-layout-grid-line"></i></span><span
+              class="sidebar--item">Dashboard</span></a></li>
+        <li><a href="/fingpt" id="active--link"><span class="icon icon-2"><i class="ri-robot-3-fill"></i></span><span
+              class="sidebar--item">FinGPT</span></a></li>
+        <li><a href="/family"><span class="icon icon-2"><i class="ri-team-fill"></i></span><span
+              class="sidebar--item">My Family</span></a></li>
+        <li><a href="/investments"><span class="icon icon-4"><i class="ri-database-2-fill"></i></span><span
+              class="sidebar--item">My Investments</span></a></li>
+        <li><a href="/expenses"><span class="icon icon-5"><i class="ri-receipt-fill"></i></span><span
+              class="sidebar--item">My Expenses</span></a></li>
+        <li><a href="/liabilities"><span class="icon icon-5"><i class="ri-pass-pending-fill"></i></span><span
+              class="sidebar--item">My Liabilities</span></a></li>
+        <li><a href="/goals"><span class="icon icon-5"><i class="ri-focus-2-fill"></i></span><span
+              class="sidebar--item">My Goals</span></a></li>
+        <li><a href="/learnings"><span class="icon icon-5"><i class="ri-book-open-fill"></i></span><span
+              class="sidebar--item">Learning</span></a></li>
+        <li><a href="/myprofile"><span class="icon icon-5"><i class="ri-account-circle-fill"></i></span><span
+              class="sidebar--item">My Profile</span></a></li>
+      </ul>
+
+      <ul class="sidebar--bottom-items">
+        <li><a href="/api/logout"><span class="icon icon-8"><i class="ri-logout-circle-line"></i></span><span
+              class="sidebar--item">Logout</span></a></li>
+      </ul>
+    </div>
+
+    <div style="margin-left:300px; padding-left:20px">
+      <div class="section-name"
+        style="display:flex; justify-content:space-between; align-items:center; padding:10px; background-color:#ffffff; box-shadow:2px 5px 20px rgba(12,12,12,0.1);">
+        <div style="font-size:22px; font-weight:bold; color:#000000">Chat with FinGPT</div>
+
+        <div style="display:flex; align-items:center">
+          <div style="text-align:right; margin-right:10px">
+            <div style="font-size:16px; font-weight:bold; color:#041643">
+              <%=user.name%>
+            </div>
+            <% if(user.familyId){ %>
+              <div style="font-size:12px; color:#072777">Family ID: <%=user.familyId%>
+              </div>
+              <% } %>
+          </div>
+
+          <div
+            style="width:50px; height:50px; border-radius:50%; background-color:#000000; display:flex; align-items:center; justify-content:center;">
+            <i class="ri-account-circle-fill" style="font-size:40px; color:#ffffff"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages"></div>
+
+        <div class="chat-input">
+          <input style="font-family:'Poppins'" type="text" id="userInput" placeholder="Type or speak your message..."
+            onkeypress="handleKeyPress(event)" />
+          <button id="micBtn" class="mic-btn" type="button"><i class="ri-mic-line"></i></button>
+          <div id="loader" style="display:none; text-align:center; padding:10px">
+            <div class="loader"></div>
+          </div>
+          <button onclick="sendMessage()" class="send-btn"
+            style="background-color:#072777; font-size:large; padding-left:30px; padding-right:30px;">Ask</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /*******************************
+       * Chat + Speech Handling Script
+       *******************************/
+
+      const chatMessages = document.getElementById("chat-messages");
+      const userInput = document.getElementById("userInput");
+      const loader = document.getElementById("loader");
+      const micBtn = document.getElementById("micBtn");
+
+      // Web Speech API objects
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechSynthesis = window.speechSynthesis || window.webkitSpeechSynthesis;
+      let recognition = null;
+
+      // State
+      let listening = false;
+      let interimTranscript = "";
+      let finalTranscript = "";
+
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+
+        // Continuous listening to prevent premature stopping
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
+
+        let silenceTimer = null;
+        const SILENCE_DELAY = 2500; // Wait 2.5 seconds of silence
+
+        // UI helper
+        function setListeningUI(state) {
+          listening = state;
+          if (state) {
+            micBtn.classList.add('listening');
+            micBtn.innerHTML = '<i class="ri-mic-fill"></i>';
+            userInput.placeholder = "Listening...";
+            // optional: clear input as we start to avoid mixing old text
+            userInput.value = "";
+            interimTranscript = "";
+            finalTranscript = "";
+          } else {
+            micBtn.classList.remove('listening');
+            micBtn.innerHTML = '<i class="ri-mic-line"></i>';
+            userInput.placeholder = "Type or speak your message...";
+          }
+        }
+
+        recognition.onstart = () => {
+          console.log('recognition started');
+          setListeningUI(true);
+        };
+
+        recognition.onresult = (event) => {
+          // Clear silence timer on every new result
+          if (silenceTimer) clearTimeout(silenceTimer);
+
+          // Build interim + final results from event
+          interimTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const res = event.results[i];
+            if (res.isFinal) {
+              finalTranscript += res[0].transcript;
+            } else {
+              interimTranscript += res[0].transcript;
+            }
+          }
+
+          // Show combined transcript in input so user sees what's being captured
+          const combined = (finalTranscript + " " + interimTranscript).trim();
+          userInput.value = combined;
+
+          // Set silence timer to stop listening and send after delay
+          silenceTimer = setTimeout(() => {
+            console.log("Silence detected, stopping recognition...");
+            recognition.stop();
+          }, SILENCE_DELAY);
+        };
+
+        // When speech ends (browser detects no more sound), the recognition typically stops
+        recognition.onspeechend = () => {
+          // Let onend handle the final transcript processing after browser stops recognition
+          console.log('speech ended - browser detected silence');
+        };
+
+        recognition.onend = () => {
+          // Recognition stopped (either user stopped speaking or we called stop)
+          if (silenceTimer) clearTimeout(silenceTimer);
+
+          setListeningUI(false);
+          const captured = (finalTranscript || userInput.value || "").trim();
+          console.log('recognition ended. captured:', captured);
+
+          // Only send when there's real text captured
+          if (captured.length > 0) {
+            userInput.value = captured;
+            // small delay to allow UI to update before sending
+            setTimeout(() => sendMessage(), 200);
+          } else {
+            // no speech captured – be silent (no bot message) or show small console warning
+            console.log('No speech captured.');
+          }
+
+          // reset transcripts for next session
+          interimTranscript = "";
+          finalTranscript = "";
+        };
+
+        recognition.onerror = (event) => {
+          console.error('speech error:', event.error);
+          setListeningUI(false);
+
+          if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+            addMessage("Microphone access denied. Please allow microphone permission for this site.", "bot-message", true);
+          } else if (event.error === 'no-speech' || event.error === 'aborted' || event.error === 'network') {
+            // don't spam chat on normal timeouts
+            console.warn('speech timeout or aborted:', event.error);
+            // IMPORTANT: Do NOT show "Voice recognition error" for these common, non-critical errors
+            return;
+          } else {
+            addMessage("Voice recognition error: " + event.error, "bot-message", true);
+          }
+
+          // clear transcripts to avoid stale text
+          interimTranscript = "";
+          finalTranscript = "";
+        };
+      } else {
+        // Browser doesn't support SpeechRecognition
+        micBtn.style.display = 'none';
+        console.warn("SpeechRecognition not supported in this browser. Use Chrome/Edge for best results.");
+      }
+
+      // User gesture binding (ensures start() is called from a click)
+      micBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleSpeechRecognition();
+      });
+
+      function toggleSpeechRecognition() {
+        if (!recognition) {
+          alert("Speech Recognition is not supported in this browser.");
+          return;
+        }
+
+        if (listening) {
+          try {
+            recognition.stop();
+          } catch (err) {
+            console.warn('stop error', err);
+            setListeningUI(false);
+          }
+          return;
+        }
+
+        // Start a new recognition session
+        try {
+          // reset transcripts
+          finalTranscript = "";
+          interimTranscript = "";
+          recognition.start();
+        } catch (startErr) {
+          // start() can throw if started twice rapidly; try a tiny retry
+          console.warn('recognition start error', startErr);
+          setTimeout(() => {
+            try { recognition.start(); } catch (e) { console.error('retry start failed', e); }
+          }, 200);
+        }
+      }
+
+      /***********************
+       * Chat / Network Logic
+       ***********************/
+      async function sendMessage() {
+        const messageText = userInput.value.trim();
+
+        if (!messageText) return; // nothing to send
+
+        // show user message
+        addMessage(messageText, "user-message", false);
+        userInput.value = "";
+
+        loader.style.display = "block";
+        try {
+          const res = await fetch("/api/botresponse", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userPrompt: messageText }),
+          });
+
+          if (!res.ok) throw new Error('Network response was not ok');
+
+          const data = await res.json();
+          const botText = data.botResponse || "Sorry, I couldn't understand that.";
+          addMessage(botText, "bot-message", true);
+        } catch (err) {
+          console.error('sendMessage error', err);
+          addMessage("There was an error processing your request. Please try again later.", "bot-message", true);
+        } finally {
+          loader.style.display = "none";
+        }
+      }
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      }
+
+      function addMessage(text, className, speak) {
+        const messageBubble = document.createElement("div");
+        messageBubble.classList.add("message", className);
+        messageBubble.innerText = text;
+        chatMessages.appendChild(messageBubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (speak) speakMessage(text);
+      }
+
+      function speakMessage(text) {
+        if (!SpeechSynthesis) return;
+        // stop any ongoing speech
+        SpeechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        // optional: utterance.lang = 'en-US';
+        SpeechSynthesis.speak(utterance);
+      }
+    </script>
+  </body>
+
+  </html>

@@ -1,0 +1,325 @@
+<% /* views/myprofile.ejs */ %>
+
+  <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/css/dashboard.css" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <title>My Profile</title>
+    <link rel="icon" href="/img/Icon.png" type="image/png">
+
+    <style>
+      /* Page-specific profile styles */
+      .profile-container {
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 30px;
+      }
+
+      .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f1f1f1;
+        padding-bottom: 15px;
+      }
+
+      .profile-header h1 {
+        font-size: 32px;
+        font-weight: bold;
+        color: #041643;
+        margin-bottom: 5px;
+      }
+
+      .profile-avatar {
+        font-size: 80px;
+        color: #007bff;
+      }
+
+      .profile-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .detail-card {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        flex: 1 1 calc(33.333% - 20px);
+        min-width: 250px;
+      }
+
+      .detail-card h3 {
+        font-size: 18px;
+        color: #555;
+        margin-bottom: 5px;
+      }
+
+      .detail-card p {
+        font-size: 20px;
+        font-weight: bold;
+        color: #041643;
+      }
+
+      /* ===== Page-scoped layout safety (fix white gap & logo overflow) ===== */
+      :root {
+        --sidebar-width-page: 355px;
+      }
+
+      /* Ensure the sidebar is fixed and constrained on this page */
+      .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        width: var(--sidebar-width-page) !important;
+        max-width: var(--sidebar-width-page) !important;
+        padding: 30px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2.5rem !important;
+        background-color: #041643 !important;
+        box-shadow: 2px 1px 6px rgba(0, 0, 0, 0.08) !important;
+        overflow: hidden !important;
+        z-index: 999 !important;
+        border-top-right-radius: 15px !important;
+      }
+
+      /* Constrain the sidebar logo so it never overflows */
+      .sidebar img.logo,
+      .sidebar .logo {
+        display: block !important;
+        width: 85% !important;
+        max-width: 220px !important;
+        max-height: 140px !important;
+        height: auto !important;
+        object-fit: contain !important;
+        margin: 0 0.5rem 1rem 0 !important;
+        padding: 6px 0 !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Make sure main content is offset and aligned at the top */
+      .main--content {
+        margin-left: var(--sidebar-width-page) !important;
+        width: calc(100% - var(--sidebar-width-page)) !important;
+        position: relative !important;
+        z-index: 1 !important;
+        padding: 1.25rem 2rem !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Remove large top gaps that may have been added by other styles */
+      section.main,
+      .main--content,
+      .section-name {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+      }
+
+      /* Defensive: first child inside main--content should not have big margin */
+      .main--content>*:first-child {
+        margin-top: 0 !important;
+      }
+
+      /* Collapsed sidebar fallback */
+      .sidebar.active {
+        width: 103px !important;
+        max-width: 103px !important;
+      }
+
+      .main--content.active {
+        margin-left: 103px !important;
+        width: calc(100% - 103px) !important;
+      }
+
+      @media (max-width: 900px) {
+        :root {
+          --sidebar-width-page: 85px;
+        }
+
+        .sidebar {
+          padding: 15px !important;
+        }
+
+        .sidebar img.logo,
+        .sidebar .logo {
+          max-width: 140px !important;
+          width: 70% !important;
+          margin-left: 0 !important;
+        }
+
+        .main--content {
+          margin-left: var(--sidebar-width-page) !important;
+          width: calc(100% - var(--sidebar-width-page)) !important;
+          padding: 1rem !important;
+        }
+      }
+    </style>
+    <style>
+      .sidebar a,
+      .sidebar .sidebar--item,
+      .sidebar--items a span,
+      .sidebar--bottom-items a span {
+        color: #ffffff !important;
+      }
+    </style>
+    <style>
+      /* Sidebar text white — keep icons colored */
+      .sidebar .sidebar--item,
+      .sidebar--items a .sidebar--item,
+      .sidebar--bottom-items a .sidebar--item {
+        color: #ffffff !important;
+      }
+    </style>
+
+
+  </head>
+
+  <body>
+    <section class="main">
+      <div class="sidebar">
+        <img src="/img/logo.png" alt="description" class="logo" />
+        <hr style="width: 100%; margin-top:35%" />
+
+        <ul class="sidebar--items" style="margin-right: 1rem; margin-top:2rem">
+          <li><a href="/"><span class="icon icon-1"><i class="ri-layout-grid-line"></i></span><span
+                class="sidebar--item">Dashboard</span></a></li>
+          <li><a href="/fingpt"><span class="icon icon-2"><i class="ri-robot-3-fill"></i></span><span
+                class="sidebar--item">FinGPT</span></a></li>
+          <li><a href="/family"><span class="icon icon-2"><i class="ri-team-fill"></i></span><span
+                class="sidebar--item">My Family</span></a></li>
+          <li><a href="/investments"><span class="icon icon-4"><i class="ri-database-2-fill"></i></span><span
+                class="sidebar--item">My Investments</span></a></li>
+          <li><a href="/expenses"><span class="icon icon-5"><i class="ri-receipt-fill"></i></span><span
+                class="sidebar--item">My Expenses</span></a></li>
+          <li><a href="/liabilities"><span class="icon icon-5"><i class="ri-pass-pending-fill"></i></span><span
+                class="sidebar--item">My Liabilities</span></a></li>
+          <li><a href="/goals"><span class="icon icon-5"><i class="ri-focus-2-fill"></i></span><span
+                class="sidebar--item">My Goals</span></a></li>
+          <li><a href="/learnings"><span class="icon icon-5"> <i class="ri-book-open-fill"></i></span><span
+                class="sidebar--item">Learning</span></a></li>
+          <li><a href="/myprofile" id="active--link"><span class="icon icon-5"><i
+                  class="ri-account-circle-fill"></i></span><span class="sidebar--item">My Profile</span></a></li>
+        </ul>
+        <ul class="sidebar--bottom-items" style="margin-top: 10rem;margin-right:1rem">
+          <li><a href="/api/logout"><span class="icon icon-8"><i class="ri-logout-circle-line"></i></span><span
+                class="sidebar--item" style="margin-right: 5.5rem;">Logout</span></a></li>
+        </ul>
+      </div>
+      <div class="main--content">
+        <div class="section-name" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #ffffff;
+             box-shadow: 2px 5px 20px rgba(12, 12, 12, 0.1); margin-top:1rem">
+          <div style="font-size: 22px; font-weight: bold; color: #000000;">My Profile</div>
+          <div style="display: flex; align-items: center;">
+            <div style="text-align: right; margin-right: 10px;">
+              <div style="font-size: 16px; font-weight: bold; color: #041643;">
+                <%=user.name%>
+              </div>
+              <% if(user.familyId){ %>
+                <div style="font-size: 12px; color: #072777;">Family ID: <%=user.familyId%>
+                </div>
+                <% } %>
+            </div>
+            <div
+              style="width: 50px; height: 50px; border-radius: 50%; background-color: #000000; display: flex; align-items: center; justify-content: center;">
+              <i class="ri-account-circle-fill" style="font-size: 40px; color: #ffffff;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="profile-container">
+          <div class="profile-header">
+            <i class="ri-account-circle-fill profile-avatar"></i>
+            <h1>
+              <%=user.name%>
+            </h1>
+            <p style="color: #6c757d; font-size: 16px;">
+              <%=user.email%>
+            </p>
+          </div>
+
+          <div class="profile-details">
+            <div class="detail-card">
+              <h3>Date of Birth</h3>
+              <p>
+                <%=user.dob.toDateString()%>
+              </p>
+            </div>
+            <div class="detail-card">
+              <h3>Phone Number</h3>
+              <p>
+                <%=user.phone%>
+              </p>
+            </div>
+            <div class="detail-card">
+              <h3>Country</h3>
+              <p>
+                <%=user.country%>
+              </p>
+            </div>
+
+            <div class="detail-card" style="background-color: #e4ffe0;">
+              <h3>Annual Income</h3>
+              <p>
+                <%=user.currency%>
+                  <%=user.annualIncome.toFixed(2)%>
+              </p>
+            </div>
+            <div class="detail-card" style="background-color: #e8efff;">
+              <h3>Occupation</h3>
+              <p>
+                <%=user.occupation%>
+              </p>
+            </div>
+            <div class="detail-card" style="background-color: #fffce0;">
+              <h3>Currency</h3>
+              <p>
+                <%=user.currency%>
+              </p>
+            </div>
+
+            <div class="detail-card" style="background-color: #f1f8e9;">
+              <h3>Financial Health Score</h3>
+              <p style="color: #28a745;">
+                <%=user.financeHealthScore%>
+              </p>
+            </div>
+            <div class="detail-card" style="background-color: #ffe0e0;">
+              <h3>Risk Profile</h3>
+              <p style="color: #dc3545;">
+                <%=user.riskProfile%>
+              </p>
+            </div>
+            <div class="detail-card" style="background-color: #e0f7fa;">
+              <h3>Account Count</h3>
+              <p>
+                <%=user.accounts.length%>
+              </p>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div style="text-align: center; margin-top: 20px;">
+          <form action="/delete-account" method="POST"
+            onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+            <button type="submit"
+              style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px;">
+              Delete Account
+            </button>
+          </form>
+        </div>
+      </div>
+      <br />
+      <br />
+      </div>
+    </section>
+  </body>
+
+  </html>
